@@ -1,0 +1,313 @@
+{
+    "interact": {
+        "magic": "APF_VER_1",
+        "variables": [
+            {
+                "name": "Lives",
+                "id": 1,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0x20000000",
+                "mask": "0xFFFFFFFC",
+                "writeonly": true,
+                "options": [
+                    {
+                        "name": "3",
+                        "value": "0x0"
+                    },
+                    {
+                        "name": "4",
+                        "value": "0x1"
+                    },
+                    {
+                        "name": "5",
+                        "value": "0x2"
+                    },
+                    {
+                        "name": "6",
+                        "value": "0x3"
+                    }
+                ],
+                "defaultval": "0x0"
+            },
+            {
+                "name": "Bonus Life",
+                "id": 2,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0x50000000",
+                "mask": "0xFFFFFFFE",
+                "writeonly": true,
+                "options": [
+                    {
+                        "name": "1000",
+                        "value": "0x1"
+                    },
+                    {
+                        "name": "1500",
+                        "value": "0x0"
+                    }
+                ],
+                "defaultval": "0x0"
+            },
+            {
+                "name": "Display Coinage",
+                "id": 3,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0x30000000",
+                "mask": "0xFFFFFFFE",
+                "writeonly": true,
+                "options": [
+                    {
+                        "name": "On",
+                        "value": "0x0"
+                    },
+                    {
+                        "name": "Off",
+                        "value": "0x1"
+                    }
+                ],
+                "defaultval": "0x0"
+            },
+            {
+                "name": "Cabinet",
+                "id": 4,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0x40000000",
+                "mask": "0xFFFFFFFE",
+                "writeonly": true,
+                "options": [
+                    {
+                        "name": "Upright",
+                        "value": "0x0"
+                    },
+                    {
+                        "name": "Cocktail",
+                        "value": "0x01"
+                    }
+                ],
+                "defaultval": "0x0"
+            },
+            {
+                "name": "Monochrome Scanlines",
+                "id": 10,
+                "type": "list",
+                "writeonly": true,
+                "enabled": true,
+                "persist": true,
+                "address": "0x70000000",
+                "mask": "0xFFFFFFF8",
+                "options": [
+                    {
+                        "name": "Off",
+                        "value": "0x0"
+                    },
+                    {
+                        "name": "25%",
+                        "value": "0x1"
+                    },
+                    {
+                        "name": "50%",
+                        "value": "0x2"
+                    },
+                    {
+                        "name": "75%",
+                        "value": "0x3"
+                    },
+                    {
+                        "name": "100%",
+                        "value": "0x4"
+                    }
+                ],
+                "defaultval": "0x0"
+            },
+            {
+                "name": "Background",
+                "id": 5,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0x60000000",
+                "mask": "0xFFFFFFFE",
+                "writeonly": true,
+                "options": [
+                    {
+                        "name": "Mirror",
+                        "value": "0x0"
+                    },
+                    {
+                        "name": "Off",
+                        "value": "0x1"
+                    }
+                ],
+                "defaultval": "0x0"
+            },
+            {
+                "name": "Reset",
+                "id": 100,
+                "type": "action",
+                "enabled": true,
+                "address": "0x80000000",
+                "value": "0x1"
+            },
+            {
+                "name": "Enable Analogizer",
+                "id": 20,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0xF7000000",
+                "defaultval": 0,
+                "mask": "0xFFFF7FFF",
+                "options": [
+                    {
+                        "name": "Off",
+                        "value": "0x00000000"
+                    },
+                    {
+                        "name": "On",
+                        "value": "0x00008000"
+                    }
+                ]
+            },
+            {
+            "name": "SNAC Adapter",
+            "id": 40,
+            "type": "list",
+            "enabled": true,
+            "persist": true,
+            "address": "0xF7000000",
+            "defaultval": "0x00",
+            "mask": "0xFFFFFFE0",
+            "options": [
+                {
+                "value": "0x00",
+                "name": "None"
+                },
+                {
+                "value": "0x03",
+                "name": "SNES"
+                },
+                {
+                "value": "0x0B",
+                "name": "SNES A,B<->X,Y"
+                },
+                {
+                "value": "0x11",
+                "name": "PSX (Digital DPAD)"
+                },
+                {
+                "value": "0x13",
+                "name": "PSX (Analog DPAD)"
+                }
+            ]
+            },
+            {
+            "name": "SNAC Controller Assignment",
+            "id": 50,
+            "type": "list",
+            "enabled": true,
+            "persist": true,
+            "address": "0xF7000000",
+            "defaultval": "0x00",
+            "mask": "0xFFFFFC3F",
+            "options": [
+                {
+                "value": "0x0",
+                "name": "SNAC -> P1"
+                },
+                {
+                "value": "0x40",
+                "name": "SNAC -> P2"
+                },
+                {
+                "value": "0x80",
+                "name": "SNAC P1,P2->P1,P2"
+                }
+            ]
+            },
+            {
+            "name": "Analogizer Video Out",
+            "id": 60,
+            "type": "list",
+            "enabled": true,
+            "persist": true,
+            "address": "0xF7000000",
+            "defaultval": "0x0",
+            "mask": "0xFFFFC3FF",
+            "options": [
+            {
+                "value": "0x0",
+                "name": "RGBS"
+            },
+            {
+                "value": "0x0400",
+                "name": "RGsB"
+            },
+            {
+                "value": "0x0800",
+                "name": "YPbPr"
+            },
+            {
+                "value": "0x1400",
+                "name": "RGBHV"
+            },
+            {
+                "value": "0x2000",
+                "name": "RGBS,Pocket OFF"
+            },
+            {
+                "value": "0x2400",
+                "name": "RGsB,Pocket OFF"
+            },
+            {
+                "value": "0x2800",
+                "name": "YPbPr,Pocket OFF"
+            },
+            {
+                "value": "0x3400",
+                "name": "RGBHV,Pocket OFF"
+            }
+            ]
+            },
+            {
+                "name": "Video H Offset",
+                "id": 15,
+                "type": "slider_u32",
+                "enabled": true,
+                "address": "0xF7000004",
+                "persist": true,
+                "defaultval": 0,
+                "graphical": {
+                "signed": true,
+                "min": -32,
+                "max": 31,
+                "adjust_small": 1,
+                "adjust_large": 4
+                }
+            },
+            {
+                "name": "Video V Offset",
+                "id": 16,
+                "type": "slider_u32",
+                "enabled": true,
+                "address": "0xF7000008",
+                "persist": true,
+                "defaultval": 0,
+                "graphical": {
+                "signed": true,
+                "min": -16,
+                "max": 15,
+                "adjust_small": 1,
+                "adjust_large": 4
+                }
+            }
+        ]
+    }
+}

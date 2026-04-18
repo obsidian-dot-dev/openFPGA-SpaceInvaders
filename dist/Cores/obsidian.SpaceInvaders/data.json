@@ -1,0 +1,25 @@
+{
+    "data": {
+        "magic": "APF_VER_1",
+        "data_slots": [
+            {
+                "id": 101,
+                "name": "ROM",
+                "required": true,
+                "parameters": "0x08",
+                "address": "0x0",
+                "size": 8192,
+                "filename": "invaders.rom"
+            },
+            {
+                "id": 102,
+                "name": "BG",
+                "required": true,
+                "parameters": "0x02",
+                "address": "0x10000000",
+                "size": 917504,
+                "filename": "backdrop_high.bin"
+            }
+        ]
+    }
+}

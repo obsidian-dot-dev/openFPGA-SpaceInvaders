@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<misterromdescription>
+  <name>Space Invaders</name>
+  <setname>invaders</setname>
+  <year>1978</year>
+  <manufacturer>Taito / Midway</manufacturer>
+  <rom index="0" zip="invaders.zip" type="merged">
+    <part name="9316b-0869_m739h.h1" path="9316b-0869_m739h.h1" crc="734f5ad8"/>
+    <part name="9316b-0856_m739g.g1" path="9316b-0856_m739g.g1" crc="6bfaca4a"/>
+    <part name="9316b-0855_m739f.f1" path="9316b-0855_m739f.f1" crc="0ccead96"/>
+    <part name="9316b-0854_m739e.e1" path="9316b-0854_m739e.e1" crc="14e538b0"/>
+  </rom>
+  <rbf>SpaceInvaders</rbf>
+</misterromdescription>
