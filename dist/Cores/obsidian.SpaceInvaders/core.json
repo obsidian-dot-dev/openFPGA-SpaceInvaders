@@ -6,9 +6,9 @@
                 "spaceinvaders"
             ],
             "shortname": "SpaceInvaders",
-            "description": "Test.",
-            "author": "Obsidian",
-            "url": "https://github.com/open-fpga/core-template",
+            "description": "Space Invaders arcade machine",
+            "author": "obsidian",
+            "url": "https://github.com/obisidian-dot-dev/openFPGA-SpaceInvaders",
             "version": "0.9.0",
             "date_release": "2026-04-18"
         },
