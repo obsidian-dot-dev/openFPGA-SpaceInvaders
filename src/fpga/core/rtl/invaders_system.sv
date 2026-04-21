@@ -17,6 +17,7 @@ module invaders_system (
   
   // Video Controls
   input  logic        backdrop_en_i,
+  input  logic        is_15khz_i,
   input  logic [2:0]  scanline_strength_i,
   
   // ROM Loading Port (from data_loader)
@@ -119,13 +120,13 @@ module invaders_system (
     .sdram_burst_len_o,
     .sdram_wr_req_o,
     .sdram_rd_req_o,
-    .sdram_available_i,
     .sdram_ready_i,
     .sdram_rdata_i,
-    
-	 .backdrop_en_i, 
-	 .scanline_strength_i(scanline_strength_i),
-	 
+
+    .backdrop_en_i, 
+    .is_15khz_i,
+    .scanline_strength_i(scanline_strength_i),
+
     .video_rgb_o,
     .hsync_o,
     .vsync_o,

@@ -19,6 +19,15 @@
                 "address": "0x10000000",
                 "size": 917504,
                 "filename": "backdrop_high.bin"
+            },
+            {
+                "id": 103,
+                "name": "BGL",
+                "required": true,
+                "parameters": "0x02",
+                "address": "0x10200000",
+                "size": 229376,
+                "filename": "backdrop_low.bin"
             }
         ]
     }

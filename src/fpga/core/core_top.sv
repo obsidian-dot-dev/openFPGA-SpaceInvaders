@@ -533,6 +533,9 @@ synch_3 #(.WIDTH(1)) s_load_done (loading_done_74_q, loading_done_q, clk_client)
 wire [2:0] scanline_strength_vid;
 synch_3 #(.WIDTH(3)) s_scanlines (monochrome_scanlines[2:0], scanline_strength_vid, clk_vid);
 
+wire is_15khz_vid;
+synch_3 #(.WIDTH(1)) s_15khz (analogizer_ena && analogizer_settings[14], is_15khz_vid, clk_vid);
+
 core_bridge_cmd icb (
     .clk(clk_74a), .reset_n(reset_n), .bridge_endian_little(bridge_endian_little), .bridge_addr(bridge_addr), .bridge_rd(bridge_rd),
     .bridge_rd_data(cmd_bridge_rd_data), .bridge_wr(bridge_wr), .bridge_wr_data(bridge_wr_data),
@@ -550,11 +553,11 @@ mf_pllbridge mp0 (.refclk(clk_74a), .rst(0), .outclk_0(clk_root), .locked(pll_br
 wire clk_sys, pll_sdram_locked;
 mf_pllsdram mp2 (.refclk(clk_root), .rst(~pll_bridge_locked), .outclk_0(clk_sys), .locked(pll_sdram_locked));
 
-wire clk_vid, clk_vid_90, pll_core_locked;
-mf_pllbase mp1 (.refclk(clk_root), .rst(~pll_bridge_locked), .outclk_0(), .outclk_1(clk_vid), .outclk_2(clk_vid_90), .locked(pll_core_locked));
+wire clk_vid, clk_vid_90, clk_vid_5, clk_vid_5_90, pll_core_locked;
+mf_pllbase mp1 (.refclk(clk_root), .rst(~pll_bridge_locked), .outclk_0(), .outclk_1(clk_vid), .outclk_2(clk_vid_90), .outclk_3(clk_vid_5), .outclk_4(clk_vid_5_90), .locked(pll_core_locked));
 
-assign video_rgb_clock = clk_vid;
-assign video_rgb_clock_90 = clk_vid_90;
+assign video_rgb_clock = is_15khz_vid ? clk_vid_5 : clk_vid;
+assign video_rgb_clock_90 = is_15khz_vid ? clk_vid_5_90 : clk_vid_90;
 
 wire clk_client = clk_vid; // 20MHz
 wire rst_client_n;
@@ -644,11 +647,15 @@ wire [9:0]  sys_h_cnt, sys_v_cnt;
 reg video_de_reg;
 reg video_hs_reg;
 reg video_vs_reg;
+reg video_hb_reg;
+reg video_vb_reg;
 reg [23:0] video_rgb_reg;
 
-always @(posedge clk_vid) begin
+always @(posedge video_rgb_clock) begin
     video_hs_reg <= hsync_sys;
     video_vs_reg <= vsync_sys;
+    video_hb_reg <= hblank_sys;
+    video_vb_reg <= vblank_sys;
     video_de_reg <= ~hblank_sys && ~vblank_sys;
 
     if (~hblank_sys && ~vblank_sys && loading_done_q) begin
@@ -660,7 +667,7 @@ always @(posedge clk_vid) begin
         // Black = Ready but Blanking
         if (!init_complete) video_rgb_reg <= 24'hFF0000;
         else if (!loading_done_q) video_rgb_reg <= 24'h0000FF;
-        else video_rgb_reg <= 24'h000000;
+        else video_rgb_reg <= is_15khz_vid ? 24'h002000 : 24'h000000;
     end
 end
 
@@ -680,7 +687,7 @@ wire        audio_strobe;
 // aligns gameplay with the cellophane bands.
 reg frame_sync_q;
 always @(posedge clk_client) begin
-    frame_sync_q <= (sys_v_cnt == 519 && sys_h_cnt == 0);
+    frame_sync_q <= (sys_v_cnt == (is_15khz_vid ? 260 : 519) && sys_h_cnt == 0);
 end
 wire frame_sync = frame_sync_q;
 
@@ -694,6 +701,7 @@ invaders_system core (
     .dip_coinage_i   (cs_coinage),
     .dip_cabinet_i   (cs_cabinet),
     .backdrop_en_i   (cs_bg), 
+    .is_15khz_i      (analogizer_ena && analogizer_settings[14]),
     .scanline_strength_i(scanline_strength_vid),
 
     // ROM Loading
@@ -799,12 +807,12 @@ sound_i2s #(
 
 wire HSync, VSync;
 jtframe_resync jtframe_resync (
-    .clk(clk_vid),
+    .clk(video_rgb_clock),
     .pxl_cen(1'b1),
-    .hs_in(~hsync_sys), // Invert because invaders_graphics produces active-low syncs
-    .vs_in(~vsync_sys), // but jtframe_resync expects active-high for edge detection
-    .LVBL(vblank_sys),
-    .LHBL(hblank_sys),
+    .hs_in(~video_hs_reg), // Use registered video outputs
+    .vs_in(~video_vs_reg),
+    .LVBL(~video_de_reg),
+    .LHBL(~video_de_reg),
     .hoffset(hoffset),
     .voffset(voffset),
     .hs_out(HSync), // Produce active-high pulses
@@ -812,7 +820,7 @@ jtframe_resync jtframe_resync (
 );
 
 wire crt_csync = ~(HSync | VSync); // Active-low CSync from active-high HSync/VSync
-wire crt_blankn = ~(hblank_sys | vblank_sys);
+wire crt_blankn = video_de_reg;
 
 localparam [39:0] NTSC_PHASE_INC = 40'd196783852899; 
 localparam [39:0] PAL_PHASE_INC =  40'd243729904257; 
@@ -829,13 +837,13 @@ openFPGA_Pocket_Analogizer #(
 .i_rst(~reset_n),
 .i_ena(analogizer_ena),
 // Video interface
-.video_clk(clk_vid),
+.video_clk(video_rgb_clock),
 .analog_video_type(analogizer_video_type),
 .R(video_rgb_reg[23:16]),
 .G(video_rgb_reg[15:8]),
 .B(video_rgb_reg[7:0]),
-.Hblank(hblank_sys), 
-.Vblank(vblank_sys), 
+.Hblank(video_hb_reg), 
+.Vblank(video_vb_reg), 
 .BLANKn(video_de_reg),
 
 .Hsync(HSync),
@@ -847,8 +855,8 @@ openFPGA_Pocket_Analogizer #(
     .PALFLAG(PALFLAG),
     // Scandoubler
     .ce_pix(1'b1),
-    .scandoubler(1'b0), // Disabled: core is already 2x scaled (31kHz)
-    .fx({1'b0, analogizer_fx[1:0]}), // Bits 1:0 are scanlines, bit 2 (hq2x) disabled
+    .scandoubler(1'b0), // Disabled: core is already 2x scaled (31kHz) or 1x (15kHz)
+    .fx(is_15khz_vid ? 3'd0 : {1'b0, analogizer_fx[1:0]}), // Bits 1:0 are scanlines, bit 2 (hq2x) disabled
     // SNAC controller interface
     .conf_AB(snac_game_cont_type >= 5'd16),
     .game_cont_type(snac_game_cont_type),

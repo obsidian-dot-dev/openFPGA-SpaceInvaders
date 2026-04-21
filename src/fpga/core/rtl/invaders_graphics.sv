@@ -38,6 +38,7 @@ module invaders_graphics (
   
   // Mirror Backdrop Emulation Enabled
   input  logic 		  backdrop_en_i,
+  input  logic        is_15khz_i,
   
   // Final Video Output
   input  logic [2:0]  scanline_strength_i,
@@ -153,23 +154,23 @@ module invaders_graphics (
   // -------------------------------------------------------------------------
   // Static Image Buffer (Backdrop)
   // -------------------------------------------------------------------------
-  wire [31:0] pix_data;
-  wire        pix_valid;
-  wire        hsync_img, vsync_img, hblank_img, vblank_img;
-  wire [9:0]  bg_h_cnt, bg_v_cnt;
+  wire [31:0] pix_data_high;
+  wire        pix_valid_high;
+  wire        hsync_img_high, vsync_img_high, hblank_img_high, vblank_img_high;
+  wire [9:0]  bg_h_cnt_high, bg_v_cnt_high;
 
   static_image_buffer #(
-    .LineWidth(512),
-    .NumLines(448),
-    .PixelWidth(32),
-    .BusWidth(128),
+    .LineWidth  (512),
+    .NumLines   (448),
+    .PixelWidth (32),
+    .BusWidth   (128),
     .HFrontPorch(32),
-    .HSyncPulse(64),
-    .HBackPorch(32),
+    .HSyncPulse (64),
+    .HBackPorch (32),
     .VFrontPorch(10),
-    .VSyncPulse(2),
-    .VBackPorch(61)
-  ) img_buf (
+    .VSyncPulse (2),
+    .VBackPorch (61)
+  ) img_buf_high (
     .clk_sys_i          (clk_i),
     .rst_sys_ni         (rst_ni),
     .base_addr_i        (32'h0),
@@ -186,20 +187,75 @@ module invaders_graphics (
     .clk_pix_en_i       (1'b1),
     .sync_rst_i         (1'b0),
 
-    .hsync_o            (hsync_img),
-    .vsync_o            (vsync_img),
-    .hblank_o           (hblank_img),
-    .vblank_o           (vblank_img),
-    .h_cnt_o            (bg_h_cnt),
-    .v_cnt_o            (bg_v_cnt),
-    .pix_data_o         (pix_data),
-    .pix_valid_o        (pix_valid),
+    .hsync_o            (hsync_img_high),
+    .vsync_o            (vsync_img_high),
+    .hblank_o           (hblank_img_high),
+    .vblank_o           (vblank_img_high),
+    .h_cnt_o            (bg_h_cnt_high),
+    .v_cnt_o            (bg_v_cnt_high),
+    .pix_data_o         (pix_data_high),
+    .pix_valid_o        (pix_valid_high),
+    .frame_sync_o       ()
+  );
+
+  // -------------------------------------------------------------------------
+  // Timing Generator Override for 15kHz
+  // -------------------------------------------------------------------------
+  logic vclk_prev_q;
+  always_ff @(posedge clk_i) vclk_prev_q <= vclk_5mhz_i;
+  wire vclk_en_5mhz = vclk_5mhz_i && !vclk_prev_q;
+
+  wire [31:0] pix_data_low;
+  wire        pix_valid_low;
+  wire        hsync_img_low, vsync_img_low, hblank_img_low, vblank_img_low;
+  wire [9:0]  bg_h_cnt_low, bg_v_cnt_low;
+
+  static_image_buffer #(
+    .LineWidth  (256),
+    .NumLines   (224),
+    .PixelWidth (32),
+    .BusWidth   (128),
+    .HFrontPorch(16),
+    .HSyncPulse (32),
+    .HBackPorch (16),
+    .VFrontPorch(10),
+    .VSyncPulse (2),
+    .VBackPorch (26)
+  ) img_buf_low (
+    .clk_sys_i          (clk_i),
+    .rst_sys_ni         (rst_ni),
+    .base_addr_i        (32'h100000), // 1MB offset for low-res backdrop
+
+    .sdram_req_o        (port_rd_req[2]),
+    .sdram_addr_o       (port_addr[2]),
+    .sdram_ready_i      (port_available[2]),
+    .sys_rdata_i        (port_rdata[2]),
+    .sdram_rdata_valid_i(port_rvalid[2]),
+    .init_done_i        (loading_done_i),
+
+    .clk_pix_i          (clk_i),
+    .rst_pix_ni         (rst_ni),
+    .clk_pix_en_i       (vclk_en_5mhz),
+    .sync_rst_i         (1'b0),
+
+    .hsync_o            (hsync_img_low),
+    .vsync_o            (vsync_img_low),
+    .hblank_o           (hblank_img_low),
+    .vblank_o           (vblank_img_low),
+    .h_cnt_o            (bg_h_cnt_low),
+    .v_cnt_o            (bg_v_cnt_low),
+    .pix_data_o         (pix_data_low),
+    .pix_valid_o        (pix_valid_low),
     .frame_sync_o       ()
   );
 
   assign port_wr_req[1] = 1'b0;
   assign port_wdata[1]  = '0;
   assign port_byte_en[1] = 16'hFFFF;
+
+  assign port_wr_req[2] = 1'b0;
+  assign port_wdata[2]  = '0;
+  assign port_byte_en[2] = 16'hFFFF;
 
   // Tie off other arbiter ports
   assign port_wr_req[0] = 1'b0;
@@ -208,16 +264,28 @@ module invaders_graphics (
   assign port_wdata[0]  = '0;
   assign port_byte_en[0] = '0;
 
-  assign port_wr_req[2] = 1'b0;
-  assign port_rd_req[2] = 1'b0;
-  assign port_addr[2]   = '0;
-  assign port_wdata[2]  = '0;
-  assign port_byte_en[2] = '0;
+  wire [31:0] pix_data = is_15khz_i ? pix_data_low : pix_data_high;
+  wire        pix_valid = is_15khz_i ? pix_valid_low : pix_valid_high;
+  wire        hsync_img = is_15khz_i ? hsync_img_low : hsync_img_high;
+  wire        vsync_img = is_15khz_i ? vsync_img_low : vsync_img_high;
+  wire        hblank_img = is_15khz_i ? hblank_img_low : hblank_img_high;
+  wire        vblank_img = is_15khz_i ? vblank_img_low : vblank_img_high;
+  wire [9:0]  bg_h_cnt = is_15khz_i ? bg_h_cnt_low : bg_h_cnt_high;
+  wire [9:0]  bg_v_cnt = is_15khz_i ? bg_v_cnt_low : bg_v_cnt_high;
 
   // -------------------------------------------------------------------------
-  // Gameplay Scaler (2x)
+  // Timing Generator Override for 15kHz
   // -------------------------------------------------------------------------
-  logic video_2x;
+  // We need to pass the correct dimensions to the effects and scaler
+  wire [9:0] h_cnt_active = bg_h_cnt;
+  wire [9:0] v_cnt_active = bg_v_cnt;
+  wire hblank_active = hblank_img;
+  wire vblank_active = vblank_img;
+
+  // -------------------------------------------------------------------------
+  // Gameplay Scaler / Bypass
+  // -------------------------------------------------------------------------
+  logic video_mixed;
   invaders_video_scaler u_scaler (
     .clk_i, .rst_ni,
     .vclk_5mhz_i (vclk_5mhz_i),
@@ -226,23 +294,28 @@ module invaders_graphics (
     .v_cnt_i     (core_v_cnt_i),
     .hblank_i    (core_hblank_i),
     .vblank_i    (core_vblank_i),
-    .h_cnt_20mhz_i(bg_h_cnt),
-    .v_cnt_20mhz_i(bg_v_cnt),
-    .video_2x_o  (video_2x)
+    .h_cnt_20mhz_i(h_cnt_active),
+    .v_cnt_20mhz_i(v_cnt_active),
+    .video_2x_o  (video_mixed)
   );
+
+  wire video_final_path = is_15khz_i ? core_video_i : video_mixed;
 
   // -------------------------------------------------------------------------
   // Video Effects & Blending
   // -------------------------------------------------------------------------
   invaders_video_effects u_fx (
-    .clk_i, .rst_ni,
+    .clk_i       (clk_i), 
+    .clk_en_i    (is_15khz_i ? vclk_en_5mhz : 1'b1),
+    .rst_ni,
     .backdrop_en_i(backdrop_en_i),
-    .scanline_strength_i(scanline_strength_i),
-    .video_i     (video_2x),
-    .h_cnt_i     (bg_h_cnt), 
-    .v_cnt_i     (bg_v_cnt),
-    .hblank_i    (hblank_img),
-    .vblank_i    (vblank_img),
+    .is_15khz_i  (is_15khz_i),
+    .scanline_strength_i(is_15khz_i ? 3'd0 : scanline_strength_i), // Disable scanlines in 15kHz
+    .video_i     (video_final_path),
+    .h_cnt_i     (h_cnt_active), 
+    .v_cnt_i     (v_cnt_active),
+    .hblank_i    (hblank_active),
+    .vblank_i    (vblank_active),
     
     .bg_addr_o   (),
     .bg_idx_i    (8'h0),
@@ -256,9 +329,9 @@ module invaders_graphics (
 
   assign hsync_o = hsync_img;
   assign vsync_o = vsync_img;
-  assign hblank_o = hblank_img;
-  assign vblank_o = vblank_img;
-  assign bg_h_cnt_o = bg_h_cnt;
-  assign bg_v_cnt_o = bg_v_cnt;
+  assign hblank_o = hblank_active;
+  assign vblank_o = vblank_active;
+  assign bg_h_cnt_o = h_cnt_active;
+  assign bg_v_cnt_o = v_cnt_active;
 
 endmodule

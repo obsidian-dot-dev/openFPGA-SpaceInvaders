@@ -8,10 +8,12 @@
 
 module invaders_video_effects (
   input  logic        clk_i,
+  input  logic        clk_en_i,
   input  logic        rst_ni,
   
   // Controls
   input  logic        backdrop_en_i, // 1: Mirror effect, 0: Solid Black background
+  input  logic        is_15khz_i,
   input  logic [2:0]  scanline_strength_i, // 0: Off, 1: 25%, 2: 50%, 3: 75%, 4: 100%
   
   // From Scaler (Landscape 512x448)
@@ -43,10 +45,14 @@ module invaders_video_effects (
   // input h_cnt_i: 0-511 (Landscape width)
   // input v_cnt_i: 0-447 (Landscape height)
   // Portrait: px (0-447), py (0-511)
+  logic [9:0] px_base, py_base;
+  assign px_base = is_15khz_i ? {v_cnt_i[8:0], 1'b0} : v_cnt_i[9:0];
+  assign py_base = is_15khz_i ? {h_cnt_i[8:0], 1'b0} : h_cnt_i[9:0];
+
   logic [8:0] px;
   logic [9:0] py;
-  assign px = v_cnt_i[8:0];
-  assign py = 10'd511 - h_cnt_i[9:0];
+  assign px = px_base[8:0];
+  assign py = 10'd511 - py_base;
 
   // 2. Color Overlay Logic (Updated for 512 scale)
   logic [23:0] overlay_color;
@@ -93,7 +99,7 @@ module invaders_video_effects (
       {backdrop_en_q, backdrop_en_q2} <= '0;
       {v_cnt_q, v_cnt_q2} <= '0;
       video_rgb_o <= 24'd0;
-    end else begin
+    end else if (clk_en_i) begin
       video_q <= video_i;
       video_q2 <= video_q;
       
