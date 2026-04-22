@@ -811,15 +811,15 @@ jtframe_resync jtframe_resync (
     .pxl_cen(1'b1),
     .hs_in(~video_hs_reg), // Use registered video outputs
     .vs_in(~video_vs_reg),
-    .LVBL(~video_de_reg),
-    .LHBL(~video_de_reg),
+    .LVBL(video_vb_reg),
+    .LHBL(video_hb_reg),
     .hoffset(hoffset),
     .voffset(voffset),
     .hs_out(HSync), // Produce active-high pulses
     .vs_out(VSync)
 );
 
-wire crt_csync = ~(HSync | VSync); // Active-low CSync from active-high HSync/VSync
+wire crt_csync = ~(HSync ^ VSync); // CSync == XNOR of HSync and VSync
 wire crt_blankn = video_de_reg;
 
 localparam [39:0] NTSC_PHASE_INC = 40'd196783852899; 
