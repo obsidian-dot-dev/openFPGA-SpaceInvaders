@@ -533,8 +533,10 @@ synch_3 #(.WIDTH(1)) s_load_done (loading_done_74_q, loading_done_q, clk_client)
 wire [2:0] scanline_strength_vid;
 synch_3 #(.WIDTH(3)) s_scanlines (monochrome_scanlines[2:0], scanline_strength_vid, clk_vid);
 
+wire is_15khz_mode = (analogizer_ena && ((analogizer_video_type & 4'h7) != 4'h5 || analogizer_settings[14]));
+
 wire is_15khz_vid;
-synch_3 #(.WIDTH(1)) s_15khz (analogizer_ena && analogizer_settings[14], is_15khz_vid, clk_vid);
+synch_3 #(.WIDTH(1)) s_15khz (is_15khz_mode, is_15khz_vid, clk_vid);
 
 core_bridge_cmd icb (
     .clk(clk_74a), .reset_n(reset_n), .bridge_endian_little(bridge_endian_little), .bridge_addr(bridge_addr), .bridge_rd(bridge_rd),
@@ -671,7 +673,7 @@ always @(posedge video_rgb_clock) begin
     end
 end
 
-assign video_de = video_de_reg;
+assign video_de = video_de_reg && (!analogizer_video_type[3] || !analogizer_ena);
 assign video_hs = video_hs_reg;
 assign video_vs = video_vs_reg;
 assign video_rgb = video_rgb_reg;
@@ -701,7 +703,7 @@ invaders_system core (
     .dip_coinage_i   (cs_coinage),
     .dip_cabinet_i   (cs_cabinet),
     .backdrop_en_i   (cs_bg), 
-    .is_15khz_i      (analogizer_ena && analogizer_settings[14]),
+    .is_15khz_i      (is_15khz_vid),
     .scanline_strength_i(scanline_strength_vid),
 
     // ROM Loading

@@ -6,11 +6,11 @@
                 "spaceinvaders"
             ],
             "shortname": "SpaceInvaders",
-            "description": "Test.",
-            "author": "Obsidian",
-            "url": "https://github.com/open-fpga/core-template",
+            "description": "Space Invaders arcade Machine",
+            "author": "obsidian",
+            "url": "https://github.com/obsidian-dot-dev/openFPGA-SpaceInvaders",
             "version": "0.9.1",
-            "date_release": "2026-04-20"
+            "date_release": "2026-04-27"
         },
         "framework": {
             "target_product": "Analogue Pocket",

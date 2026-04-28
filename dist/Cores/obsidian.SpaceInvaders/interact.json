@@ -240,55 +240,63 @@
             "persist": true,
             "address": "0xF7000000",
             "defaultval": "0x0",
-            "mask": "0xFFFF83FF",
+            "mask": "0xFFFF03FF",
             "options": [
             {
-                "value": "0x0",
+                "value": "0xC000",
                 "name": "RGBS"
             },
             {
-                "value": "0x4000",
-                "name": "RGBS (15kHz)"
+                "value": "0xE000",
+                "name": "RGBS, PocketOff"
             },
             {
-                "value": "0x0400",
+                "value": "0xC400",
                 "name": "RGsB"
             },
             {
-                "value": "0x4400",
-                "name": "RGsB (15kHz)"
+                "value": "0xE400",
+                "name": "RGsB, PocketOff"
             },
             {
-                "value": "0x0800",
+                "value": "0xC800",
                 "name": "YPbPr"
             },
             {
-                "value": "0x4800",
-                "name": "YPbPr (15kHz)"
+                "value": "0xE800",
+                "name": "YPbPr, PocketOff"
             },
             {
-                "value": "0x1400",
-                "name": "RGBHV"
+                "value": "0xCC00",
+                "name": "Y/C NTSC"
             },
             {
-                "value": "0x5400",
-                "name": "RGBHV (15kHz)"
+                "value": "0xEC00",
+                "name": "Y/C NTSC, PocketOff"
             },
             {
-                "value": "0x2000",
-                "name": "RGBS,Pocket OFF"
+                "value": "0xD000",
+                "name": "Y/C PAL"
             },
             {
-                "value": "0x2400",
-                "name": "RGsB,Pocket OFF"
+                "value": "0xF000",
+                "name": "Y/C PAL, PocketOff"
             },
             {
-                "value": "0x2800",
-                "name": "YPbPr,Pocket OFF"
+                "value": "0xD400",
+                "name": "RGBHV "
             },
             {
-                "value": "0x3400",
-                "name": "RGBHV,Pocket OFF"
+                "value": "0xF400",
+                "name": "RGBHV, PocketOff "
+            },
+            {
+                "value": "0x9400",
+                "name": "RGBHV (31kHz)"
+            },
+            {
+                "value": "0xB400",
+                "name": "RGBHV, PocketOff (31k)"
             }
             ]
             },
