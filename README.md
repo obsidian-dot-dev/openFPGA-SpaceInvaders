@@ -14,9 +14,8 @@ This repo contains a gateware core compatible with the original 1978 Space Invad
 
 The core includes integration for the Analogizer adapter, but users should be aware of the following technical constraints:
 
-- **31 kHz / VGA Output Only:** The core's video pipeline is natively upscaled to 2x (512x448) at a 20 MHz pixel clock to support high-resolution backdrops. This results in a horizontal frequency of approximately **31.25 kHz**. 
-- **CRT Compatibility:** Due to the 31 kHz output, the Analogizer will only work with VGA monitors, PC CRTs, or multi-sync professional monitors (PVM/BVM) capable of handling 31 kHz signals.
-- **Unsupported Modes:** Standard 15 kHz televisions using Y/C (S-Video/Composite) or standard Component connections are **not compatible** with this core in its current 2x scaled configuration.
+- **31 kHz / VGA Output:** The core's video pipeline is natively upscaled to 2x (512x448) at a 20 MHz pixel clock to support high-resolution backdrops. This results in a horizontal frequency of approximately **31.25 kHz**. 
+- **CRT Compatibility:** As of v0.9.1, *unscaled* (256x224) display support has been implemented (including low-res background images), adding compatibilty with CRTs and low-frequency (15kHz) monitors.
 - **SNAC Support:** Full support for SNAC controllers (NES, SNES, PSX, etc.) is provided and operates at the 20 MHz master clock rate.
 - **CRT Scanlines:** A specialized scanline effect is available in the menu. This effect is applied exclusively to the **CRT game layer** (simulating the reflection from the CRT in the original cabinet mirror assembly) and does not affect the high-resolution background backdrop, ensuring authentic visual fidelity.
 + **DIP Switches:** Adjustable settings for starting lives, bonus life thresholds, and coinage through the interact menu.
